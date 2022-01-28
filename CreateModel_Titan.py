@@ -56,8 +56,6 @@ print("The mean molecular mass of the atmosphere is:", Planet1.mu)
 
 
 CurrentDirectory = os.getcwd()
-print("The current directory is given by::", CurrentDirectory)
-input("We wait here...")
 BaseLocation =  os.path.join(CurrentDirectory,"CS")
 Planet1.LoadCrossSection(BaseLocation, SubFolder="CS_1", CIA=False)
 T1 = TransmissionSpectroscopy(Planet1, CIA=False)

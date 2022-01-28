@@ -114,9 +114,9 @@ class TransmissionSpectroscopy:
 
                 if self.CIA:
                     self.alpha[:,self.CurrentLayer] +=   \
-                    (Target.nz_H2_ama[self.CurrentLayer]*Target.nz_H2_ama[self.CurrentLayer])*((1-co_t)*Target.CIA_CS[TIndex,0,:]+(co_t)*Target.CIA_CS[TIndex+1,0,:]) + \
-                    (Target.nz_H2_ama[self.CurrentLayer]*Target.nz_H2_ama[self.CurrentLayer]*15./85.)*((1-co_t)*Target.CIA_CS[TIndex,1,:]+(co_t)*Target.CIA_CS[TIndex+1,1,:]) + \
-                    (Target.nz_N2_ama[self.CurrentLayer]*Target.nz_N2_ama[self.CurrentLayer])*((1-co_t)*Target.CIA_CS[TIndex,2,:]+(co_t)*Target.CIA_CS[TIndex+1,2,:])
+                    (Target.nz_H2_ama[self.CurrentLayer]*Target.nz_H2_ama[self.CurrentLayer])*((1-co_t)*Target.CIA_CS[TIndex-1,0,:]+(co_t)*Target.CIA_CS[TIndex,0,:]) + \
+                    (Target.nz_H2_ama[self.CurrentLayer]*Target.nz_H2_ama[self.CurrentLayer]*15./85.)*((1-co_t)*Target.CIA_CS[TIndex-1,1,:]+(co_t)*Target.CIA_CS[TIndex,1,:]) + \
+                    (Target.nz_N2_ama[self.CurrentLayer]*Target.nz_N2_ama[self.CurrentLayer])*((1-co_t)*Target.CIA_CS[TIndex-1,2,:]+(co_t)*Target.CIA_CS[TIndex,2,:])
 
                     SelectIndex = self.alpha[:, self.CurrentLayer]<0
                     self.alpha[SelectIndex, self.CurrentLayer] = 0.0
