@@ -148,10 +148,11 @@ class System:
         self.loschmidt = 2.6867811E19           #Lochsmidt number
 
 
-    def PT_Profile(self, zStep=0.25, ShowPlot=False):
+    def PT_Profile(self, zStep=0.25, ShowPlot=False, PT_Type="ALR"):
         '''
         This method calculates the Pressure Temperature profile
-        for the planet
+        for the planet as well as the number density as the function of 
+        altitude(z).
 
         Parameters:
         -----------------
@@ -167,32 +168,96 @@ class System:
         #assert np.sign(self.Tinf-self.T0) == -np.sign(self.Gam)
 
         #atmospheric scaled height in km
-        self.H0 =self.k_bo*self.T0/(self.mu/self.N_av*self.Gp)/1e5 #H0 is in kilometers
-        self.ScaleHeight = np.arange(0,100,zStep)
-        self.zValues = self.ScaleHeight*self.H0 #In kilometers
-        self.dz = np.diff(self.zValues) #In kilometers
 
-        self.zValuesCm=self.zValues*1e5
-        self.TzAnalytical = self.Tinf+(self.T0-self.Tinf)*np.exp(-self.zValues*self.Gam)
-        self.Gz = self.G_gr*self.Mp/((self.Rp+self.zValuesCm)*(self.Rp+self.zValuesCm))
-        self.Hz = self.k_bo*self.TzAnalytical/(self.mu/self.N_av*self.Gz)/1e5
+        #Simple logarithmic adabatic lapse rate for now
+        
+        if PT_Type=="ALR": 
+            self.H0 =self.k_bo*self.T0/(self.mu/self.N_av*self.Gp)/1e5 #H0 is in kilometers
+            self.ScaleHeight = np.arange(0,100,zStep)
+            self.zValues = self.ScaleHeight*self.H0 #In kilometers
+            self.dz = np.diff(self.zValues) #In kilometers
 
-        self.PzAnalytical = [self.P0/self.P_atm]
-        for i in range(len(self.TzAnalytical)-1):
-            self.PzAnalytical.append(self.PzAnalytical[-1]*np.exp(-self.dz[i]/self.Hz[i]))
-        self.PzAnalytical = np.array(self.PzAnalytical) #In atm
-        self.PzAnalyticalLog = np.log10(self.PzAnalytical) #In atm
+            self.zValuesCm=self.zValues*1e5
+            self.TzAnalytical = self.Tinf+(self.T0-self.Tinf)*np.exp(-self.zValues*self.Gam)
+            self.Gz = self.G_gr*self.Mp/((self.Rp+self.zValuesCm)*(self.Rp+self.zValuesCm))
+            self.Hz = self.k_bo*self.TzAnalytical/(self.mu/self.N_av*self.Gz)/1e5
 
-        self.dz_cm = self.dz*1e5
+            self.PzAnalytical = [self.P0/self.P_atm]
+            for i in range(len(self.TzAnalytical)-1):
+                self.PzAnalytical.append(self.PzAnalytical[-1]*np.exp(-self.dz[i]/self.Hz[i]))
+            self.PzAnalytical = np.array(self.PzAnalytical) #In atm
+            self.PzAnalyticalLog = np.log10(self.PzAnalytical) #In atm
 
-        SelectIndex = self.PzAnalyticalLog>-15.0
-        self.PzAnalytical = self.PzAnalytical[SelectIndex]
-        self.TzAnalytical = self.TzAnalytical[SelectIndex]
-        self.zValues = self.zValues[SelectIndex]
-        self.dz = np.diff(self.zValues)
-        self.zValuesCm = self.zValuesCm[SelectIndex]
-        self.Gz = self.Gz[SelectIndex]
-        self.Hz = self.Hz[SelectIndex]
+            self.dz_cm = self.dz*1e5
+
+            SelectIndex = self.PzAnalyticalLog>-15.0
+            self.PzAnalytical = self.PzAnalytical[SelectIndex]
+            self.TzAnalytical = self.TzAnalytical[SelectIndex]
+            self.zValues = self.zValues[SelectIndex]
+            self.dz = np.diff(self.zValues)
+            self.zValuesCm = self.zValuesCm[SelectIndex]
+            self.Gz = self.Gz[SelectIndex]
+            self.Hz = self.Hz[SelectIndex]
+
+        if PT_Type=="POLY":
+            #Using polynomial in order to fit for the transit
+            #  
+            self.H0 =self.k_bo*self.T0/(self.mu/self.N_av*self.Gp)/1e5 #H0 is in kilometers
+            self.ScaleHeight = np.arange(0,100,zStep)
+            self.zValues = self.ScaleHeight*self.H0 #In kilometers
+            self.dz = np.diff(self.zValues) #In kilometers
+
+            self.zValuesCm=self.zValues*1e5
+            self.TzAnalytical = self.Tinf+(self.T0-self.Tinf)*np.exp(-self.zValues*self.Gam)
+            self.Gz = self.G_gr*self.Mp/((self.Rp+self.zValuesCm)*(self.Rp+self.zValuesCm))
+            self.Hz = self.k_bo*self.TzAnalytical/(self.mu/self.N_av*self.Gz)/1e5
+
+            self.PzAnalytical = [self.P0/self.P_atm]
+            for i in range(len(self.TzAnalytical)-1):
+                self.PzAnalytical.append(self.PzAnalytical[-1]*np.exp(-self.dz[i]/self.Hz[i]))
+            self.PzAnalytical = np.array(self.PzAnalytical) #In atm
+            self.PzAnalyticalLog = np.log10(self.PzAnalytical) #In atm
+
+            self.dz_cm = self.dz*1e5
+
+            SelectIndex = self.PzAnalyticalLog>-15.0
+            self.PzAnalytical = self.PzAnalytical[SelectIndex]
+            self.TzAnalytical = self.TzAnalytical[SelectIndex]
+            self.zValues = self.zValues[SelectIndex]
+            self.dz = np.diff(self.zValues)
+            self.zValuesCm = self.zValuesCm[SelectIndex]
+            self.Gz = self.Gz[SelectIndex]
+            self.Hz = self.Hz[SelectIndex]    
+
+        #Use a custom PT profile    
+        elif PT_Type.upper()=="CUSTOM": 
+            self.H0 =self.k_bo*self.T0/(self.mu/self.N_av*self.Gp)/1e5 #H0 is in kilometers
+            self.ScaleHeight = np.arange(0,100,zStep)
+            self.zValues = self.ScaleHeight*self.H0 #In kilometers
+            self.dz = np.diff(self.zValues) #In kilometers
+
+            self.zValuesCm=self.zValues*1e5
+
+            self.TzAnalytical = self.Tinf+(self.T0-self.Tinf)*np.exp(-self.zValues*self.Gam)
+            self.Gz = self.G_gr*self.Mp/((self.Rp+self.zValuesCm)*(self.Rp+self.zValuesCm))
+            self.Hz = self.k_bo*self.TzAnalytical/(self.mu/self.N_av*self.Gz)/1e5
+
+            self.PzAnalytical = [self.P0/self.P_atm]
+            for i in range(len(self.TzAnalytical)-1):
+                self.PzAnalytical.append(self.PzAnalytical[-1]*np.exp(-self.dz[i]/self.Hz[i]))
+            self.PzAnalytical = np.array(self.PzAnalytical) #In atm
+            self.PzAnalyticalLog = np.log10(self.PzAnalytical) #In atm
+
+            self.dz_cm = self.dz*1e5
+
+            SelectIndex = self.PzAnalyticalLog>-15.0
+            self.PzAnalytical = self.PzAnalytical[SelectIndex]
+            self.TzAnalytical = self.TzAnalytical[SelectIndex]
+            self.zValues = self.zValues[SelectIndex]
+            self.dz = np.diff(self.zValues)
+            self.zValuesCm = self.zValuesCm[SelectIndex]
+            self.Gz = self.Gz[SelectIndex]
+            self.Hz = self.Hz[SelectIndex]    
 
         #Number density in per cm^3
         self.nz0 = self.N_av/22400.0*self.P0/self.P_atm*273.15/self.T0*self.MixingRatios

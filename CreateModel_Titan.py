@@ -3,15 +3,15 @@ import numpy as np
 import os
 from tierra import Target
 from tierra.transmission import TransmissionSpectroscopy
-from tierra.JWSTErrorbar import BinningDataNIRSpecPrism, BinningDataCombined
+
 
 PlanetParamsDict = {}
 PlanetParamsDict['P0'] = 1.0 #the base of the atmosphere being probedatmosphere
 PlanetParamsDict['T0'] = 160
 PlanetParamsDict['ALR'] = 0.01
 PlanetParamsDict['TInf'] = 160
-PlanetParamsDict['Mass'] = 0.0225   # Need to find proper references for mass
-PlanetParamsDict['Radius'] = 0.404  # Need to find proper references for mass
+PlanetParamsDict['Mass'] = 0.0225   # Need to find proper references for mass. This is in earth mass 
+PlanetParamsDict['Radius'] = 0.404  # Need to find proper references for earth radii.
 PlanetParamsDict['MR_CO'] = 1e-7
 PlanetParamsDict['MR_CO2'] = 1e-50
 PlanetParamsDict['MR_H2O'] = 1e-50
@@ -20,13 +20,17 @@ PlanetParamsDict['MR_O3'] = 1e-50
 PlanetParamsDict['MR_N2'] = 0.98
 
 
+
+
+
 #Currently the hydrogen makes up the rest of the composition so that it adds up to 1
 MR_H2 = 85./100.*(1.0 -PlanetParamsDict['MR_CO'] -PlanetParamsDict['MR_CO2']  \
                 -PlanetParamsDict['MR_H2O']-PlanetParamsDict['MR_CH4']  \
                 -PlanetParamsDict['MR_O3']-PlanetParamsDict['MR_N2'])
 
 PlanetParamsDict['MR_H2'] = MR_H2
-
+print("The mixing ratio of hydrogen is given by:", MR_H2)
+input("Let's crash here...")
 
 #Get the number density
 TotalNumbers = 6.023e23*PlanetParamsDict['P0']*273.15/PlanetParamsDict['T0']
